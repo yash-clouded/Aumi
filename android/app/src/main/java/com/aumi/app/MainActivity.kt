@@ -94,7 +94,10 @@ class MainActivity : AppCompatActivity() {
                     AumiKeyStore.saveSessionKey(keyBytes)
                     txtStatus.text = "Paired with Mac at ${payload.ip}"
                     Toast.makeText(this, "Pairing Successful!", Toast.LENGTH_SHORT).show()
-                    tryStartService()
+                    // Small delay to let KeyStore finalize write on S24
+                    previewView.postDelayed({
+                        tryStartService()
+                    }, 500)
                 }
             }
         }

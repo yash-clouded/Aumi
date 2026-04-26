@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
+import com.aumi.app.R
 import com.aumi.app.crypto.AESCipher
 import com.aumi.app.crypto.AumiKeyStore
 import kotlinx.coroutines.*
@@ -277,7 +278,7 @@ class AumiConnectionService : Service() {
         NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Aumi")
             .setContentText(status)
-            .setSmallIcon(android.R.drawable.ic_menu_share)
+            .setSmallIcon(R.drawable.ic_aumi_notif)
             .setOngoing(true)
             .build()
 
