@@ -1,0 +1,31 @@
+# Android
+.gradle/
+build/
+local.properties
+.cxx/
+*.apk
+*.aar
+
+# macOS
+.DS_Store
+DerivedData/
+*.xcworkspace
+xcuserdata/
+*.moved-aside
+*.xcuserstate
+.build/
+
+# Node.js
+node_modules/
+dist/
+npm-debug.log*
+.env
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# Aumi Specific
+*.session_key
+pairing_data.json

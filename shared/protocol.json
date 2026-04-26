@@ -1,0 +1,43 @@
+{
+  "version": "1.0.0",
+  "message_types": {
+    "CALL_INCOMING": "notify_mac_of_incoming_call",
+    "CALL_ANSWER": "answer_call_from_mac",
+    "CALL_DECLINE": "decline_call_from_mac",
+    "CALL_DISCONNECTED": "sync_call_end",
+    "SMS_RECEIVED": "sync_sms_to_mac",
+    "SMS_SEND": "send_sms_from_mac",
+    "NOTIF_GMAIL": "mirror_gmail_notification",
+    "CLIPBOARD_SYNC": "sync_clipboard_data",
+    "SCREEN_STREAM_START": "request_screen_mirroring",
+    "SCREEN_STREAM_STOP": "stop_screen_mirroring",
+    "FILE_TRANSFER_INIT": "initiate_file_transfer",
+    "FILE_TRANSFER_CHUNK": "send_file_chunk",
+    "FILE_TRANSFER_COMPLETE": "file_transfer_finished"
+  },
+  "payload_structures": {
+    "FILE_TRANSFER_INIT": {
+      "fileId": "string",
+      "fileName": "string",
+      "fileSize": "long",
+      "mimeType": "string"
+    },
+    "FILE_TRANSFER_CHUNK": {
+      "fileId": "string",
+      "chunkIndex": "int",
+      "data": "base64_string"
+    },
+    "CALL_INCOMING": {
+      "id": "string",
+      "number": "string",
+      "name": "string",
+      "photo_url": "string"
+    },
+    "SMS_RECEIVED": {
+      "id": "string",
+      "sender": "string",
+      "body": "string",
+      "timestamp": "long"
+    }
+  }
+}
