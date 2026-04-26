@@ -95,7 +95,8 @@ class MainActivity : AppCompatActivity() {
                     try {
                         val keyBytes = android.util.Base64.decode(payload.publicKeyBase64, android.util.Base64.DEFAULT)
                         AumiKeyStore.saveSessionKey(keyBytes)
-                        txtStatus.text = "Paired with Mac via USB"
+                        AumiKeyStore.savePeerId(payload.ip) // Use WiFi IP from QR
+                        txtStatus.text = "Paired with Mac at ${payload.ip}"
                         Toast.makeText(this, "Pairing Successful!", Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         e.printStackTrace()
