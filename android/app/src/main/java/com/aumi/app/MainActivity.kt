@@ -89,11 +89,18 @@ class MainActivity : AppCompatActivity() {
             qrScanner.startScanning(this, previewView.surfaceProvider) { payload ->
                 runOnUiThread {
                     previewView.visibility = android.view.View.GONE
-                    AumiKeyStore.savePeerId(payload.ip)
-                    val keyBytes = android.util.Base64.decode(payload.publicKeyBase64, android.util.Base64.DEFAULT)
-                    AumiKeyStore.saveSessionKey(keyBytes)
-                    txtStatus.text = "Paired with Mac at ${payload.ip}"
-                    Toast.makeText(this, "Pairing Successful!", Toast.LENGTH_SHORT).show()
+                    // Prioritize USB Localhost (127.0.0.1) for wired testing
+                    try {
+                        val keyBytes = android.util.Base64.decode(payload.publicKeyBase64, android.util.Base64.DEFAULT)
+                        AumiKeyStore.saveSessionKey(keyBytes)
+                        txtStatus.text = "Paired with Mac via USB"
+                        Toast.makeText(this, "Pairing Successful!", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Toast.makeText(this, "Security handshake failed. Try again.", Toast.LENGTH_SHORT).show()
+                        previewView.visibility = android.view.View.VISIBLE
+                        return@runOnUiThread
+                    }
                     // Small delay to let KeyStore finalize write on S24
                     previewView.postDelayed({
                         tryStartService()
