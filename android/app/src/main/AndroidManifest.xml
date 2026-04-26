@@ -63,7 +63,7 @@
         <!-- Core Networking & Connection Service -->
         <service
             android:name=".service.AumiConnectionService"
-            android:foregroundServiceType="connectedDevice|specialUse|shortService"
+            android:foregroundServiceType="connectedDevice|specialUse|shortService|phoneCall"
             android:exported="false">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
