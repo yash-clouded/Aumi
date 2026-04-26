@@ -55,7 +55,7 @@ android {
 
     packaging {
         jniLibs {
-            useLegacyPackaging = true
+            // Reverting to allow modern alignment
         }
     }
 }
