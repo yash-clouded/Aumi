@@ -43,6 +43,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".CrashActivity" android:exported="false" />
+
         <!-- Custom Lock Screen Overlay -->
         <activity
             android:name=".AumiLockScreenActivity"
