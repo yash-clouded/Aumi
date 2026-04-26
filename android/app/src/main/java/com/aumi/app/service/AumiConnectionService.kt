@@ -55,7 +55,12 @@ class AumiConnectionService : Service() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        sessionKey = AumiKeyStore.loadSessionKey()
+        try {
+            sessionKey = AumiKeyStore.loadSessionKey()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            AumiKeyStore.clearPairing()
+        }
         createNotificationChannel()
         acquireWakeLock()
     }

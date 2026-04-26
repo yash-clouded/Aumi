@@ -3,7 +3,8 @@ package com.aumi.app.services
 import android.telecom.Call
 import android.telecom.InCallService
 import android.util.Log
-import com.aumi.app.NetworkManager
+import com.aumi.app.service.AumiConnectionService
+import org.json.JSONObject
 
 class AumiInCallService : InCallService() {
 
@@ -55,21 +56,21 @@ class AumiInCallService : InCallService() {
     private fun notifyMacIncoming(call: Call) {
         val number = call.details.handle.schemeSpecificPart
         val name = "Unknown Caller"
-        val payload = mapOf(
-            "type" to "CALL_INCOMING",
-            "number" to number,
-            "name" to name,
-            "id" to call.hashCode().toString()
-        )
-        NetworkManager.shared.sendMessage(payload)
+        val payload = JSONObject().apply {
+            put("type", "CALL_INCOMING")
+            put("number", number)
+            put("name", name)
+            put("id", call.hashCode().toString())
+        }
+        AumiConnectionService.instance?.sendControl(payload)
     }
 
     private fun notifyMacDisconnected(call: Call) {
-        val payload = mapOf(
-            "type" to "CALL_DISCONNECTED",
-            "id" to call.hashCode().toString()
-        )
-        NetworkManager.shared.sendMessage(payload)
+        val payload = JSONObject().apply {
+            put("type", "CALL_DISCONNECTED")
+            put("id", call.hashCode().toString())
+        }
+        AumiConnectionService.instance?.sendControl(payload)
     }
 
     override fun onCallRemoved(call: Call) {

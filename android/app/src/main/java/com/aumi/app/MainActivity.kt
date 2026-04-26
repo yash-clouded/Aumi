@@ -90,7 +90,8 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread {
                     previewView.visibility = android.view.View.GONE
                     AumiKeyStore.savePeerId(payload.ip)
-                    AumiKeyStore.saveSessionKey(payload.publicKeyBase64.toByteArray()) // In real app, perform DH exchange
+                    val keyBytes = android.util.Base64.decode(payload.publicKeyBase64, android.util.Base64.DEFAULT)
+                    AumiKeyStore.saveSessionKey(keyBytes)
                     txtStatus.text = "Paired with Mac at ${payload.ip}"
                     Toast.makeText(this, "Pairing Successful!", Toast.LENGTH_SHORT).show()
                     tryStartService()
