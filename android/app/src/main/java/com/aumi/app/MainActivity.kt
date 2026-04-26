@@ -107,8 +107,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun tryStartService() {
         try {
-            val intent = Intent(this, AumiConnectionService::class.java)
-            startForegroundService(intent)
+            // Check for battery optimization (Crucial for Samsung S24)
+            val pm = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                val intent = Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                    data = android.net.Uri.parse("package:$packageName")
+                }
+                startActivity(intent)
+            }
+
+            val serviceIntent = Intent(this, AumiConnectionService::class.java)
+            startForegroundService(serviceIntent)
         } catch (e: Exception) {
             e.printStackTrace()
         }
