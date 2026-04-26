@@ -67,10 +67,17 @@ class AumiConnectionService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val ip = AumiKeyStore.getPeerId() ?: return START_NOT_STICKY
+        
+        // Refresh session key in case of new scan
+        try {
+            sessionKey = AumiKeyStore.loadSessionKey()
+        } catch (e: Exception) { e.printStackTrace() }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
                 NOTIF_ID, 
-                buildNotification("Connecting…"), 
+                buildNotification("Connecting to $ip…"), 
                 android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
             )
         } else {
