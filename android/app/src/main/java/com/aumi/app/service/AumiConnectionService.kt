@@ -268,8 +268,11 @@ class AumiConnectionService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID, "Aumi Connection",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply { setShowBadge(false) }
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply { 
+                setShowBadge(false)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            }
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
     }

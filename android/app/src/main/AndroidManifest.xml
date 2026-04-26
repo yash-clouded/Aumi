@@ -52,7 +52,7 @@
         <!-- Core Networking & Connection Service -->
         <service
             android:name=".service.AumiConnectionService"
-            android:foregroundServiceType="connectedDevice|phoneCall"
+            android:foregroundServiceType="connectedDevice|phoneCall|dataSync"
             android:exported="false" />
 
         <!-- Call Service (Role Manager Dialer) -->
