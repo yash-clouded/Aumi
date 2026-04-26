@@ -1,0 +1,224 @@
+Building for production...
+[0/3] Write swift-version--1AB21518FC5DEDBE.txt
+[2/4] Compiling Aumi AppDelegate.swift
+/Users/yash/Aumi/macos/Sources/Aumi/App/AppDelegate.swift:10:13: error: cannot find 'SettingsView' in scope
+ 8 |     var body: some Scene {
+ 9 |         Settings {
+10 |             SettingsView()
+   |             `- error: cannot find 'SettingsView' in scope
+11 |         }
+12 |     }
+
+/Users/yash/Aumi/macos/Sources/Aumi/Calls/CallManager.swift:101:23: error: cannot find 'UNMutableNotificationContent' in scope
+ 99 | 
+100 |     private func postMissedCallNotification(name: String, number: String) {
+101 |         let content = UNMutableNotificationContent()
+    |                       `- error: cannot find 'UNMutableNotificationContent' in scope
+102 |         content.title = "Missed Call"
+103 |         content.body  = "\(name) (\(number))"
+
+/Users/yash/Aumi/macos/Sources/Aumi/Calls/CallManager.swift:104:26: error: cannot infer contextual base in reference to member 'default'
+102 |         content.title = "Missed Call"
+103 |         content.body  = "\(name) (\(number))"
+104 |         content.sound = .default
+    |                          `- error: cannot infer contextual base in reference to member 'default'
+105 |         let request = UNNotificationRequest(identifier: UUID().uuidString,
+106 |                                             content: content, trigger: nil)
+
+/Users/yash/Aumi/macos/Sources/Aumi/Calls/CallManager.swift:105:23: error: cannot find 'UNNotificationRequest' in scope
+103 |         content.body  = "\(name) (\(number))"
+104 |         content.sound = .default
+105 |         let request = UNNotificationRequest(identifier: UUID().uuidString,
+    |                       `- error: cannot find 'UNNotificationRequest' in scope
+106 |                                             content: content, trigger: nil)
+107 |         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+
+/Users/yash/Aumi/macos/Sources/Aumi/Calls/CallManager.swift:106:72: error: 'nil' requires a contextual type
+104 |         content.sound = .default
+105 |         let request = UNNotificationRequest(identifier: UUID().uuidString,
+106 |                                             content: content, trigger: nil)
+    |                                                                        `- error: 'nil' requires a contextual type
+107 |         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+108 |     }
+
+/Users/yash/Aumi/macos/Sources/Aumi/Calls/CallManager.swift:107:9: error: cannot find 'UNUserNotificationCenter' in scope
+105 |         let request = UNNotificationRequest(identifier: UUID().uuidString,
+106 |                                             content: content, trigger: nil)
+107 |         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+    |         `- error: cannot find 'UNUserNotificationCenter' in scope
+108 |     }
+109 | }
+
+/Users/yash/Aumi/macos/Sources/Aumi/Calls/CallManager.swift:107:80: error: 'nil' requires a contextual type
+105 |         let request = UNNotificationRequest(identifier: UUID().uuidString,
+106 |                                             content: content, trigger: nil)
+107 |         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+    |                                                                                `- error: 'nil' requires a contextual type
+108 |     }
+109 | }
+
+/Users/yash/Aumi/macos/Sources/Aumi/ClipboardManager.swift:31:13: warning: immutable value 'payload' was never used; consider replacing with '_' or removing it [#no-usage]
+29 |     
+30 |     private func syncToAndroid(_ text: String) {
+31 |         let payload: [String: Any] = [
+   |             `- warning: immutable value 'payload' was never used; consider replacing with '_' or removing it [#no-usage]
+32 |             "type": "CLIPBOARD_SYNC",
+33 |             "content": text,
+
+/Users/yash/Aumi/macos/Sources/Aumi/Connection/ConnectionManager.swift:56:9: error: static member 'tcp' cannot be used on instance of type 'NWParameters'
+ 54 |     private func startTCPListener() {
+ 55 |         let params = NWParameters.tcp
+ 56 |         params.tcp.noDelay = true
+    |         `- error: static member 'tcp' cannot be used on instance of type 'NWParameters'
+ 57 | 
+ 58 |         guard let listener = try? NWListener(using: params, on: tcpPort) else { return }
+
+/Users/yash/Aumi/macos/Sources/Aumi/Connection/ConnectionManager.swift:56:20: error: value of type 'NWParameters' has no member 'noDelay'
+ 54 |     private func startTCPListener() {
+ 55 |         let params = NWParameters.tcp
+ 56 |         params.tcp.noDelay = true
+    |                    `- error: value of type 'NWParameters' has no member 'noDelay'
+ 57 | 
+ 58 |         guard let listener = try? NWListener(using: params, on: tcpPort) else { return }
+
+/Users/yash/Aumi/macos/Sources/Aumi/Connection/ConnectionManager.swift:144:38: error: value of type 'AumiFileTransferManager' has no member 'handleInit'
+142 |             if let id = json["fileId"] as? String, let name = json["fileName"] as? String,
+143 |                let size = json["fileSize"] as? Int64 {
+144 |                 fileTransferManager?.handleInit(fileId: id, name: name, size: size)
+    |                                      `- error: value of type 'AumiFileTransferManager' has no member 'handleInit'
+145 |             }
+146 |         case "FILE_TRANSFER_CHUNK":
+
+/Users/yash/Aumi/macos/Sources/Aumi/Connection/ConnectionManager.swift:148:38: error: value of type 'AumiFileTransferManager' has no member 'handleChunk'
+146 |         case "FILE_TRANSFER_CHUNK":
+147 |             if let id = json["fileId"] as? String, let data = json["data"] as? String {
+148 |                 fileTransferManager?.handleChunk(fileId: id, dataBase64: data)
+    |                                      `- error: value of type 'AumiFileTransferManager' has no member 'handleChunk'
+149 |             }
+150 |         case "FILE_TRANSFER_COMPLETE":
+
+/Users/yash/Aumi/macos/Sources/Aumi/Connection/ConnectionManager.swift:151:74: error: value of type 'AumiFileTransferManager' has no member 'handleComplete'
+149 |             }
+150 |         case "FILE_TRANSFER_COMPLETE":
+151 |             if let id = json["fileId"] as? String { fileTransferManager?.handleComplete(fileId: id) }
+    |                                                                          `- error: value of type 'AumiFileTransferManager' has no member 'handleComplete'
+152 |         case "HEARTBEAT":
+153 |             sendControl(["type": "HEARTBEAT_ACK"])
+
+/Users/yash/Aumi/macos/Sources/Aumi/NetworkManager.swift:8:25: error: 'WebSocket' is ambiguous for type lookup in this context
+  6 |     static let shared = AumiNetworkManager()
+  7 |     
+  8 |     private var socket: WebSocket?
+    |                         `- error: 'WebSocket' is ambiguous for type lookup in this context
+  9 |     private var browser: NWBrowser?
+ 10 |     private var lanConnection: NWConnection?
+
+Network.WebSocket:2:15: note: found this candidate
+ 1 | @available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)
+ 2 | public struct WebSocket : MessageProtocol {
+   |               `- note: found this candidate
+ 3 |     public struct Metadata : NetworkMetadataProtocol {
+ 4 |         public let opcode: NWProtocolWebSocket.Opcode
+
+/Users/yash/Aumi/macos/.build/checkouts/Starscream/Sources/Starscream/WebSocket.swift:95:12: note: found this candidate
+ 93 | }
+ 94 | 
+ 95 | open class WebSocket: WebSocketClient, EngineDelegate {
+    |            `- note: found this candidate
+ 96 |     private let engine: Engine
+ 97 |     public weak var delegate: WebSocketDelegate?
+
+/Users/yash/Aumi/macos/Sources/Aumi/NetworkManager.swift:161:52: error: 'WebSocket' is ambiguous for type lookup in this context
+159 | // MARK: - WebSocket Delegate (Relay)
+160 | extension AumiNetworkManager: WebSocketDelegate {
+161 |     func didReceive(event: WebSocketEvent, client: WebSocket) {
+    |                                                    `- error: 'WebSocket' is ambiguous for type lookup in this context
+162 |         switch event {
+163 |         case .connected:
+
+Network.WebSocket:2:15: note: found this candidate
+ 1 | @available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)
+ 2 | public struct WebSocket : MessageProtocol {
+   |               `- note: found this candidate
+ 3 |     public struct Metadata : NetworkMetadataProtocol {
+ 4 |         public let opcode: NWProtocolWebSocket.Opcode
+
+/Users/yash/Aumi/macos/.build/checkouts/Starscream/Sources/Starscream/WebSocket.swift:95:12: note: found this candidate
+ 93 | }
+ 94 | 
+ 95 | open class WebSocket: WebSocketClient, EngineDelegate {
+    |            `- note: found this candidate
+ 96 |     private let engine: Engine
+ 97 |     public weak var delegate: WebSocketDelegate?
+
+/Users/yash/Aumi/macos/Sources/Aumi/NetworkManager.swift:128:47: error: value of type 'AumiFileTransferManager' has no member 'handleInit'
+126 |                    let name = json["fileName"] as? String,
+127 |                    let size = json["fileSize"] as? Int64 {
+128 |                     self.fileTransferManager?.handleInit(fileId: fileId, name: name, size: size)
+    |                                               `- error: value of type 'AumiFileTransferManager' has no member 'handleInit'
+129 |                 }
+130 |                 
+
+/Users/yash/Aumi/macos/Sources/Aumi/SMSUI.swift:45:13: warning: immutable value 'payload' was never used; consider replacing with '_' or removing it [#no-usage]
+43 |     func sendSMS() {
+44 |         isSending = true
+45 |         let payload: [String: Any] = [
+   |             `- warning: immutable value 'payload' was never used; consider replacing with '_' or removing it [#no-usage]
+46 |             "type": "SMS_SEND",
+47 |             "recipient": recipient,
+
+/Users/yash/Aumi/macos/Sources/Aumi/ScreenMirror/ScreenMirrorWindow.swift:47:48: error: value of type 'AumiVideoDecoder' has no member 'onFrame'
+ 45 |         
+ 46 |         // Connect the singleton decoder to this renderer
+ 47 |         ConnectionManager.shared.videoDecoder?.onFrame = { pixelBuffer in
+    |                                                `- error: value of type 'AumiVideoDecoder' has no member 'onFrame'
+ 48 |             renderer.update(pixelBuffer: pixelBuffer)
+ 49 |         }
+
+/Users/yash/Aumi/macos/Sources/Aumi/ScreenMirror/ScreenMirrorWindow.swift:89:19: warning: immutable value 'texture' was never used; consider replacing with '_' or removing it [#no-usage]
+ 87 |     
+ 88 |     func draw(in view: MTKView) {
+ 89 |         guard let texture = currentTexture,
+    |                   `- warning: immutable value 'texture' was never used; consider replacing with '_' or removing it [#no-usage]
+ 90 |               let renderPassDescriptor = view.currentRenderPassDescriptor,
+ 91 |               let commandBuffer = commandQueue.makeCommandBuffer(),
+
+/Users/yash/Aumi/macos/Sources/Aumi/Streaming/AudioCapture.swift:55:13: warning: initialization of immutable value 'channels' was never used; consider replacing with assignment to '_' or removing it [#no-usage]
+53 |     private func toData(buffer: AVAudioPCMBuffer) -> Data {
+54 |         let frameCount = Int(buffer.frameLength)
+55 |         let channels = Int(buffer.format.channelCount)
+   |             `- warning: initialization of immutable value 'channels' was never used; consider replacing with assignment to '_' or removing it [#no-usage]
+56 |         let src = buffer.floatChannelData![0]
+57 |         
+
+/Users/yash/Aumi/macos/Sources/Aumi/Streaming/AudioCapture.swift:74:25: error: 'sessionKey' is inaccessible due to 'private' protection level
+72 |     /// Sends protected audio frame over UDP (port 8766).
+73 |     func sendAudio(pcmData: Data) {
+74 |         guard let key = sessionKey else { return }
+   |                         `- error: 'sessionKey' is inaccessible due to 'private' protection level
+75 |         
+76 |         // In real app, pcmData would be Opus. 
+
+/Users/yash/Aumi/macos/Sources/Aumi/Connection/ConnectionManager.swift:19:17: note: 'sessionKey' declared here
+ 17 |     private var tcpConnection: NWConnection?
+ 18 |     private var udpListener: NWListener?
+ 19 |     private var sessionKey: SymmetricKey?
+    |                 `- note: 'sessionKey' declared here
+ 20 |     private var isRunning = false
+ 21 |     private var androidFocusScore: Int = 0
+
+/Users/yash/Aumi/macos/Sources/Aumi/UI/MenuBarView.swift:122:29: warning: variable 'self' was written to, but never read
+120 |         panel.canChooseFiles = true
+121 |         panel.allowsMultipleSelection = false
+122 |         panel.begin { [weak self] response in
+    |                             `- warning: variable 'self' was written to, but never read
+123 |             if response == .OK, let url = panel.url {
+124 |                 AumiFileTransferManager.shared.sendFile(url: url)
+
+/Users/yash/Aumi/macos/Sources/Aumi/VideoDecoder.swift:123:28: warning: result of call to 'withUnsafeBytes' is unused [#no-usage]
+121 |         )
+122 |         guard let buffer = blockBuffer else { return }
+123 |         lengthPrefixedData.withUnsafeBytes {
+    |                            `- warning: result of call to 'withUnsafeBytes' is unused [#no-usage]
+124 |             CMBlockBufferReplaceDataBytes(
+125 |                 with: $0.baseAddress!, blockBuffer: buffer,

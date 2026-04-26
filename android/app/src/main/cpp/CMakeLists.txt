@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.18.1)
 project("aumi_native")
 
 # Set the path to the Oboe library (cloned into android/cpp/oboe)
-# set (OBOE_DIR oboe)
-# add_subdirectory(${OBOE_DIR} ./oboe)
+set (OBOE_DIR oboe)
+add_subdirectory(${OBOE_DIR} ./oboe)
 
 add_library(aumi_native SHARED
         audio_engine.cpp
@@ -19,11 +19,12 @@ find_library(log-lib log)
 # A real implementation would use a prebuilt .so or compile from source.
 
 target_include_directories(aumi_native PRIVATE
-        # ${OBOE_DIR}/include
+        ${OBOE_DIR}/include
+        ./include/opus
 )
 
 target_link_libraries(aumi_native
-        # oboe
+        oboe
         ${log-lib}
         # opus
 )

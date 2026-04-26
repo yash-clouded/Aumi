@@ -16,8 +16,7 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "Aumi",
-            dependencies: ["Starscream"],
-            path: "Aumi"
+            dependencies: ["Starscream"]
         )
     ]
 )

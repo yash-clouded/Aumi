@@ -7,6 +7,15 @@ JNI_OnLoad(JavaVM* vm, void* reserved) {
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
         return JNI_ERR;
     }
-    // Register native methods or initialize globals
     return JNI_VERSION_1_6;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_aumi_app_streaming_AudioBridge_startNative(JNIEnv *env, jobject thiz) {
+    __android_log_print(ANDROID_LOG_INFO, "AumiNative", "Starting native audio engine");
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_aumi_app_streaming_AudioBridge_stopNative(JNIEnv *env, jobject thiz) {
+    __android_log_print(ANDROID_LOG_INFO, "AumiNative", "Stopping native audio engine");
 }
