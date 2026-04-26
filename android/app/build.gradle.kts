@@ -13,14 +13,14 @@ android {
         minSdk = 28
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
         externalNativeBuild {
             cmake {
                 cppFlags("")
-                arguments("-DANDROID_STL=c++_shared")
+                arguments("-DANDROID_STL=c++_shared", "-DANDROID_SUPPORT_16K_PAGES=ON")
                 abiFilters("arm64-v8a", "armeabi-v7a", "x86_64")
             }
         }

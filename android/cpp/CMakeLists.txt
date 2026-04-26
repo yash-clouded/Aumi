@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.18.1)
 project("aumi_native")
 
+# Force 16KB page alignment globally for Android 16+
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,common-page-size=16384 -Wl,-z,max-page-size=16384")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,common-page-size=16384 -Wl,-z,max-page-size=16384")
+
 # Set the path to the Oboe library (cloned into android/cpp/oboe)
 # set (OBOE_DIR oboe)
 # add_subdirectory(${OBOE_DIR} ./oboe)
