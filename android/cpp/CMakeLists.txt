@@ -22,6 +22,12 @@ target_include_directories(aumi_native PRIVATE
         # ${OBOE_DIR}/include
 )
 
+# Future-proof for 16KB page size devices (Android 15+)
+target_link_options(aumi_native PRIVATE
+    "-Wl,-z,common-page-size=16384"
+    "-Wl,-z,max-page-size=16384"
+)
+
 target_link_libraries(aumi_native
         # oboe
         ${log-lib}
