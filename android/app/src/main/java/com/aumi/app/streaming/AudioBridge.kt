@@ -6,11 +6,14 @@ package com.aumi.app.streaming
 object AudioBridge {
     
     init {
+        // Disabled for diagnostics to find the startup crash
+        /*
         try {
             System.loadLibrary("aumi_native")
         } catch (e: Throwable) {
             e.printStackTrace()
         }
+        */
     }
 
     /**
