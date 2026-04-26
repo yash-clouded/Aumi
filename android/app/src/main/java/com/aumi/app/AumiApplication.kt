@@ -8,7 +8,8 @@ class AumiApplication : Application() {
         super.onCreate()
         try {
             AumiKeyStore.init(this)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
+            // Log and continue - don't crash the whole app
             e.printStackTrace()
         }
     }
