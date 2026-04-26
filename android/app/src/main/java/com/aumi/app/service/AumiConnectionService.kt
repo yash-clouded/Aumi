@@ -66,7 +66,15 @@ class AumiConnectionService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(NOTIF_ID, buildNotification("Connecting…"))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(
+                NOTIF_ID, 
+                buildNotification("Connecting…"), 
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+            )
+        } else {
+            startForeground(NOTIF_ID, buildNotification("Connecting…"))
+        }
 
         macIp = intent?.getStringExtra("macIp") ?: AumiKeyStore.loadPeerId()
         macIp?.let { connectToMac(it) }
