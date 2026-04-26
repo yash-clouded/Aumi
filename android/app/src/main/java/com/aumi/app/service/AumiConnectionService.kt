@@ -279,9 +279,11 @@ class AumiConnectionService : Service() {
 
     private fun buildNotification(status: String): Notification =
         NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Aumi")
+            .setContentTitle("Aumi Continuity")
             .setContentText(status)
             .setSmallIcon(R.drawable.ic_aumi_notif)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setOngoing(true)
             .build()
 

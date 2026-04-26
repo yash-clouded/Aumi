@@ -101,10 +101,10 @@ class MainActivity : AppCompatActivity() {
                         previewView.visibility = android.view.View.VISIBLE
                         return@runOnUiThread
                     }
-                    // Small delay to let KeyStore finalize write on S24
+                    // Long delay for Android 16 to stabilize
                     previewView.postDelayed({
                         tryStartService()
-                    }, 500)
+                    }, 1500)
                 }
             }
         }
