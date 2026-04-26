@@ -67,7 +67,7 @@ class AumiConnectionService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val ip = AumiKeyStore.getPeerId() ?: return START_NOT_STICKY
+        val ip = AumiKeyStore.loadPeerId() ?: return START_NOT_STICKY
         
         // Refresh session key in case of new scan
         try {
