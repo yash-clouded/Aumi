@@ -24,6 +24,7 @@
     <application
         android:name=".AumiApplication"
         android:allowBackup="true"
+        android:extractNativeLibs="true"
         android:icon="@android:drawable/ic_menu_share"
         android:label="@string/app_name"
         android:supportsRtl="true"
