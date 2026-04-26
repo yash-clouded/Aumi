@@ -50,5 +50,8 @@ object AumiKeyStore {
         prefs.edit().remove(KEY_SESSION_KEY).remove(KEY_PEER_ID).apply()
     }
 
-    fun isPaired(): Boolean = loadSessionKey() != null
+    fun isPaired(): Boolean {
+        if (!::prefs.isInitialized) return false
+        return loadSessionKey() != null
+    }
 }
