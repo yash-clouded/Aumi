@@ -6,7 +6,11 @@ package com.aumi.app.streaming
 object AudioBridge {
     
     init {
-        System.loadLibrary("aumi_native")
+        try {
+            System.loadLibrary("aumi_native")
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
     }
 
     /**

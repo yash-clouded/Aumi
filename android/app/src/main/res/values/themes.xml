@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Aumi" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.Aumi" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@android:color/holo_blue_dark</item>
+        <item name="colorSecondary">@android:color/holo_blue_light</item>
     </style>
     <style name="Theme.Aumi.NoActionBar" parent="Theme.Aumi" />
 </resources>
