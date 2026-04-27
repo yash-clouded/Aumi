@@ -115,19 +115,30 @@ class AumiNotificationListener : NotificationListenerService() {
      * Finds the cached action and fires it — Gmail sends the reply or archives the email.
      */
     fun handleCallAction(callId: String, type: String) {
-        // Look for common action titles based on 'Answer' or 'Decline'
+        android.util.Log.d("AumiNotif", "Remote action requested: $type for $callId")
+        
+        // Comprehensive search for common call action titles across all OEMs
         val searchTerms = if (type == "CALL_ANSWER") 
-            listOf("Answer", "Accept", "Pick up", "Receive")
+            listOf("Answer", "Accept", "Pick up", "Receive", "Talk", "Call")
         else 
-            listOf("Decline", "Reject", "Hang up", "Dismiss", "End")
+            listOf("Decline", "Reject", "Hang up", "Dismiss", "End", "Cancel")
 
         val prefix = "$callId:"
         val match = actionCache.keys.firstOrNull { key ->
             key.startsWith(prefix) && searchTerms.any { term -> key.contains(term, ignoreCase = true) }
         }
 
-        match?.let { 
-            actionCache[it]?.actionIntent?.send()
+        if (match != null) {
+            android.util.Log.d("AumiNotif", "Found matching action: $match. Triggering intent...")
+            try {
+                actionCache[match]?.actionIntent?.send()
+                android.util.Log.d("AumiNotif", "Intent sent successfully ✅")
+            } catch (e: Exception) {
+                android.util.Log.e("AumiNotif", "Failed to send intent ❌", e)
+            }
+        } else {
+            android.util.Log.w("AumiNotif", "NO MATCHING ACTION FOUND for $type! Check cache content.")
+            android.util.Log.d("AumiNotif", "Cache content: ${actionCache.keys.filter { it.startsWith(prefix) }}")
         }
     }
 
