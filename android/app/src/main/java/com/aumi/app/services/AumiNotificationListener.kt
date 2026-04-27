@@ -15,11 +15,34 @@ class AumiNotificationListener : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         val pkg = sbn.packageName
-
-        // Only forward Gmail for Phase 4; skip group summaries and our own notifs
-        if (pkg != "com.google.android.gm") return
-        if (sbn.notification.flags and android.app.Notification.FLAG_GROUP_SUMMARY != 0) return
         if (pkg == "com.aumi.app") return
+        if (sbn.notification.flags and android.app.Notification.FLAG_GROUP_SUMMARY != 0) return
+
+        // ── Incoming Call Detection ───────────────────────────────────────────
+        // Works for Samsung Phone, AOSP Dialer, and most OEM dialers
+        val isCallNotif = pkg in listOf(
+            "com.samsung.android.incallui",
+            "com.android.incallui",
+            "com.google.android.dialer",
+            "com.android.server.telecom"
+        ) || sbn.notification.category == android.app.Notification.CATEGORY_CALL
+
+        if (isCallNotif) {
+            val extras = sbn.notification.extras
+            val name   = extras.getString("android.title") ?: extras.getString("android.text") ?: "Unknown Caller"
+            val number = extras.getString("android.text") ?: ""
+            val payload = JSONObject().apply {
+                put("type",   "CALL_INCOMING")
+                put("name",   name)
+                put("number", number)
+                put("id",     sbn.key)
+            }
+            AumiConnectionService.instance?.sendControl(payload)
+            return
+        }
+
+        // ── Gmail Notifications ───────────────────────────────────────────────
+        if (pkg != "com.google.android.gm") return
 
         val extras = sbn.notification.extras
         val title  = extras.getString("android.title") ?: return
@@ -49,8 +72,26 @@ class AumiNotificationListener : NotificationListenerService() {
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
+        val pkg = sbn.packageName
         // Clean up action cache
         actionCache.keys.filter { it.startsWith(sbn.key) }.forEach { actionCache.remove(it) }
+
+        // If a call notification was dismissed, tell Mac the call ended
+        val isCallNotif = pkg in listOf(
+            "com.samsung.android.incallui",
+            "com.android.incallui",
+            "com.google.android.dialer",
+            "com.android.server.telecom"
+        ) || sbn.notification.category == android.app.Notification.CATEGORY_CALL
+
+        if (isCallNotif) {
+            val payload = JSONObject().apply {
+                put("type", "CALL_DISCONNECTED")
+                put("id",   sbn.key)
+            }
+            AumiConnectionService.instance?.sendControl(payload)
+            return
+        }
 
         val payload = JSONObject().apply {
             put("type",  "NOTIFICATION")
