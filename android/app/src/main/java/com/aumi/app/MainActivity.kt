@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Bundle
+import android.telecom.TelecomManager
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -50,6 +51,19 @@ class MainActivity : AppCompatActivity() {
 
         qrScanner = QRCodeScanner(this)
         checkPermissionsAndStart()
+        handleIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent?.getStringExtra("action") == "START_MIRRORING") {
+            val mpManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+            projectionLauncher.launch(mpManager.createScreenCaptureIntent())
+        }
     }
 
     private fun checkPermissionsAndStart() {
@@ -78,11 +92,16 @@ class MainActivity : AppCompatActivity() {
     private fun setupApp() {
         val btnPair = findViewById<Button>(R.id.btn_pair)
         val txtStatus = findViewById<TextView>(R.id.txt_status)
+        val btnEnableCalls = findViewById<Button>(R.id.btn_enable_calls)
 
         if (AumiKeyStore.isPaired()) {
             txtStatus.text = "Connected to paired Mac"
             tryStartService()
         }
+
+        // Calls on Mac require Aumi to be the default Phone app so the system will bind our InCallService.
+        refreshCallsButtonVisibility(btnEnableCalls)
+        btnEnableCalls.setOnClickListener { requestDefaultDialerRole() }
 
         btnPair.setOnClickListener {
             val previewView = findViewById<androidx.camera.view.PreviewView>(R.id.preview_view)
@@ -107,6 +126,7 @@ class MainActivity : AppCompatActivity() {
                     // Long delay for Android 16 to stabilize
                     previewView.postDelayed({
                         tryStartService()
+                        refreshCallsButtonVisibility(btnEnableCalls)
                     }, 1500)
                 }
             }
@@ -134,5 +154,29 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    private fun refreshCallsButtonVisibility(button: Button) {
+        button.visibility = if (isDefaultDialer()) android.view.View.GONE else android.view.View.VISIBLE
+    }
+
+    private fun isDefaultDialer(): Boolean {
+        val tm = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+        return tm.defaultDialerPackage == packageName
+    }
+
+    private fun requestDefaultDialerRole() {
+        val tm = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+        if (tm.defaultDialerPackage == packageName) {
+            Toast.makeText(this, "Aumi is already the default Phone app.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val intent = Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER).apply {
+            putExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, packageName)
+        }
+        runCatching { startActivity(intent) }
+            .onFailure {
+                Toast.makeText(this, "Unable to open default dialer settings on this device.", Toast.LENGTH_LONG).show()
+            }
     }
 }

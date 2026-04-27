@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
+import com.aumi.app.MainActivity
 import com.aumi.app.R
 import com.aumi.app.crypto.AESCipher
 import com.aumi.app.crypto.AumiKeyStore
@@ -111,7 +112,9 @@ class AumiConnectionService : Service() {
                     closeSockets()
                     tcpSocket = Socket(ip, TCP_PORT).also { it.tcpNoDelay = true }
                     tcpOut = DataOutputStream(tcpSocket!!.getOutputStream())
-                    udpSocket = DatagramSocket(UDP_PORT)
+                    // Bind to an ephemeral local port. Binding to the Mac UDP port can fail
+                    // on some devices/OS versions and can prevent the whole service from connecting.
+                    udpSocket = DatagramSocket()
 
                     updateNotification("Connected to Mac • LAN")
                     startHeartbeat()
@@ -163,11 +166,28 @@ class AumiConnectionService : Service() {
         when (json.optString("type")) {
             "CALL_ANSWER"  -> com.aumi.app.services.AumiInCallService.answerFromMac()
             "CALL_DECLINE" -> com.aumi.app.services.AumiInCallService.declineFromMac()
-            "SMS_SEND" -> {
-                val to   = json.optString("recipient")
-                val body = json.optString("body")
-                if (to.isNotEmpty() && body.isNotEmpty()) {
-                    com.aumi.app.services.AumiSmsHandler().sendSMS(to, body)
+            "SCREEN_STREAM_START" -> {
+                val intent = Intent(this, MainActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    putExtra("action", "START_MIRRORING")
+                }
+                startActivity(intent)
+            }
+            "SCREEN_STREAM_STOP" -> {
+                val intent = Intent(this, com.aumi.app.services.AumiMirroringService::class.java)
+                stopService(intent)
+            }
+            // SMS can arrive from macOS in two formats:
+            // - Legacy: { type: "SMS_SEND", recipient, body }
+            // - Current: { type: "SMS", event: "SEND", recipient, body }
+            "SMS_SEND", "SMS" -> {
+                val event = json.optString("event")
+                if (json.optString("type") == "SMS_SEND" || event == "SEND") {
+                    val to   = json.optString("recipient")
+                    val body = json.optString("body")
+                    if (to.isNotEmpty() && body.isNotEmpty()) {
+                        com.aumi.app.services.AumiSmsHandler().sendSMS(to, body)
+                    }
                 }
             }
             "HEARTBEAT_ACK" -> { /* connection alive */ }

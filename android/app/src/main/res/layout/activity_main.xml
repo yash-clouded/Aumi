@@ -58,4 +58,15 @@
         android:backgroundTint="#EDEDED"
         android:textColor="#333333" />
 
+    <Button
+        android:id="@+id/btn_enable_calls"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:text="Enable Calls on Mac (set default Phone app)"
+        android:textAllCaps="false"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#EDEDED"
+        android:textColor="#333333"
+        android:visibility="gone" />
+
 </LinearLayout>
