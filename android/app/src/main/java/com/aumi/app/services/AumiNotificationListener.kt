@@ -16,16 +16,16 @@ class AumiNotificationListener : NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         val pkg = sbn.packageName
         if (pkg == "com.aumi.app") return
-        if (sbn.notification.flags and android.app.Notification.FLAG_GROUP_SUMMARY != 0) return
 
-        // ── Incoming Call Detection ───────────────────────────────────────────
-        // Works for Samsung Phone, AOSP Dialer, and most OEM dialers
-        val isCallNotif = pkg in listOf(
-            "com.samsung.android.incallui",
-            "com.android.incallui",
-            "com.google.android.dialer",
-            "com.android.server.telecom"
-        ) || sbn.notification.category == android.app.Notification.CATEGORY_CALL
+        // ── Incoming Call Detection (HIGH PRIORITY) ──────────────────────────
+        // Check for CATEGORY_CALL first to ensure we never miss a call regardless of flags
+        val isCallNotif = sbn.notification.category == android.app.Notification.CATEGORY_CALL || 
+                        pkg in listOf(
+                            "com.samsung.android.incallui",
+                            "com.android.incallui",
+                            "com.google.android.dialer",
+                            "com.android.server.telecom"
+                        )
 
         if (isCallNotif) {
             val extras = sbn.notification.extras
@@ -40,6 +40,9 @@ class AumiNotificationListener : NotificationListenerService() {
             AumiConnectionService.instance?.sendControl(payload)
             return
         }
+
+        // ── Filter summaries and other noise for standard notifications ──────
+        if (sbn.notification.flags and android.app.Notification.FLAG_GROUP_SUMMARY != 0) return
 
         // ── Gmail Notifications ───────────────────────────────────────────────
         if (pkg != "com.google.android.gm") return

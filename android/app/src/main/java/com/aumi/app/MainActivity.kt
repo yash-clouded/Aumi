@@ -151,6 +151,13 @@ class MainActivity : AppCompatActivity() {
 
             val serviceIntent = Intent(this, AumiConnectionService::class.java)
             startForegroundService(serviceIntent)
+
+            // Check if Notification Listener is enabled
+            val enabledListeners = android.provider.Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
+            if (enabledListeners == null || !enabledListeners.contains(packageName)) {
+                Toast.makeText(this, "Please enable 'Notification Access' for Aumi in settings to sync calls!", Toast.LENGTH_LONG).show()
+                startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"))
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
