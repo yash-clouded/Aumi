@@ -164,8 +164,14 @@ class AumiConnectionService : Service() {
 
     private fun handleControl(json: JSONObject) {
         when (json.optString("type")) {
-            "CALL_ANSWER"  -> com.aumi.app.services.AumiInCallService.answerFromMac()
-            "CALL_DECLINE" -> com.aumi.app.services.AumiInCallService.declineFromMac()
+            "CALL_ANSWER" -> {
+                val id = json.optString("id")
+                com.aumi.app.services.AumiNotificationListener.instance?.handleCallAction(id, "CALL_ANSWER")
+            }
+            "CALL_DECLINE" -> {
+                val id = json.optString("id")
+                com.aumi.app.services.AumiNotificationListener.instance?.handleCallAction(id, "CALL_DECLINE")
+            }
             "SCREEN_STREAM_START" -> {
                 val intent = Intent(this, MainActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

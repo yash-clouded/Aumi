@@ -31,6 +31,12 @@ class AumiNotificationListener : NotificationListenerService() {
             val extras = sbn.notification.extras
             val name   = extras.getString("android.title") ?: extras.getString("android.text") ?: "Unknown Caller"
             val number = extras.getString("android.text") ?: ""
+            
+            // Cache available actions for Answer/Handle
+            sbn.notification.actions?.forEach { action ->
+                actionCache["${sbn.key}:${action.title}"] = action
+            }
+
             val payload = JSONObject().apply {
                 put("type",   "CALL_INCOMING")
                 put("name",   name)
@@ -108,23 +114,20 @@ class AumiNotificationListener : NotificationListenerService() {
      * Called by AumiConnectionService when Mac sends NOTIFICATION_ACTION.
      * Finds the cached action and fires it — Gmail sends the reply or archives the email.
      */
-    fun performAction(key: String, actionName: String, replyText: String? = null) {
-        val cacheKey = "$key:$actionName"
-        val action   = actionCache[cacheKey] ?: return
+    fun handleCallAction(callId: String, type: String) {
+        // Look for common action titles based on 'Answer' or 'Decline'
+        val searchTerms = if (type == "CALL_ANSWER") 
+            listOf("Answer", "Accept", "Pick up", "Receive")
+        else 
+            listOf("Decline", "Reject", "Hang up", "Dismiss", "End")
 
-        val intent = action.actionIntent
-        if (replyText != null) {
-            // Fill RemoteInput for Reply
-            val remoteInputs = action.remoteInputs ?: return
-            val resultData   = Intent()
-            val bundle       = android.os.Bundle()
-            remoteInputs.forEach { ri ->
-                bundle.putCharSequence(ri.resultKey, replyText)
-            }
-            RemoteInput.addResultsToIntent(remoteInputs, resultData, bundle)
-            intent.send(applicationContext, 0, resultData)
-        } else {
-            intent.send()
+        val prefix = "$callId:"
+        val match = actionCache.keys.firstOrNull { key ->
+            key.startsWith(prefix) && searchTerms.any { term -> key.contains(term, ignoreCase = true) }
+        }
+
+        match?.let { 
+            actionCache[it]?.actionIntent?.send()
         }
     }
 
