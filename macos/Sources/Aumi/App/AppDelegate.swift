@@ -6,18 +6,22 @@ struct AumiApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        WindowGroup {
-            EmptyView().frame(width: 0, height: 0)
+        Settings {
+            EmptyView()
         }
     }
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    static private(set) var shared: AppDelegate!
+    
     var statusItem: NSStatusItem!
     var menuBarController: MenuBarController!
     var callManager = CallManager()
+    private var pairingWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        AppDelegate.shared = self
         // 1. Wire all subsystems into ConnectionManager
         let conn = ConnectionManager.shared
         conn.callManager        = callManager
@@ -29,6 +33,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Wire call manager → audio route manager
         callManager.audioPlayer  = sharedAudioPlayer
         callManager.routeManager = sharedRouteManager
+
+        // Pairing UI Listeners
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("AumiConnected"), object: nil, queue: .main) { [weak self] _ in
+            self?.pairingWindow?.close()
+            self?.menuBarController.setConnected(deviceName: "Samsung S24 (Android 16)", latencyMs: 5)
+        }
 
         // 2. Start subsystems
         AumiClipboardManager.shared.start()
@@ -51,13 +61,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         menuBarController.configure(statusItem: statusItem)
 
-        // 6. If not paired, show pairing window
-        if !KeychainStore.isPaired() {
-            showPairingWindow()
-        }
-
-        // Hide from Dock — menu bar only app
+        // 6. Always show pairing window — it will auto-dismiss once connected
         NSApp.setActivationPolicy(.accessory)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.showPairingWindow()
+        }
     }
 
     // MARK: - Sleep / Wake
@@ -75,12 +83,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Pairing Window
 
     func showPairingWindow() {
+        if let existing = pairingWindow {
+            existing.makeKeyAndOrderFront(nil)
+            return
+        }
         let controller = NSHostingController(rootView: PairingView())
         let window = NSWindow(contentViewController: controller)
         window.title = "Aumi — Pair your Android"
         window.setContentSize(NSSize(width: 480, height: 560))
         window.styleMask = [.titled, .closable]
         window.center()
+        NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
+        self.pairingWindow = window
     }
 }

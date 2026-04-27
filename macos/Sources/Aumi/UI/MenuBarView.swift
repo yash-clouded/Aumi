@@ -14,8 +14,8 @@ class MenuBarController {
 
     func configure(statusItem: NSStatusItem) {
         self.statusItem = statusItem
-        statusItem.button?.image = NSImage(systemSymbolName: "iphone.circle.fill",
-                                           accessibilityDescription: "Aumi")
+        // High-Visibility Fallback for S24 Debugging
+        statusItem.button?.image = NSImage(named: NSImage.networkName)
         statusItem.button?.image?.isTemplate = true
         buildMenu()
         statusItem.menu = menu
@@ -127,6 +127,6 @@ class MenuBarController {
     }
 
     @objc private func openSettings() {
-        NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+        AppDelegate.shared?.showPairingWindow()
     }
 }

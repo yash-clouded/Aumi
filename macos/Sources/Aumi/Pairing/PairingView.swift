@@ -54,14 +54,17 @@ struct PairingView: View {
                     .font(.headline)
             }
         }
-        .padding(36)
-        .frame(width: 480)
         .onAppear { generateQR() }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AumiConnected"))) { _ in
+            self.isPaired = true
+            self.pairingStatus = "Successfully Linked!"
+        }
     }
 
     private func generateQR() {
         let localIp = getLocalIP() ?? "0.0.0.0"
-        let content = PairingManager.shared.pairingQRContent(localIp: localIp, port: 8765)
+        let key = PairingManager.shared.prepareNewPairing()
+        let content = "aumi://pair?id=\(Host.current().localizedName ?? "Mac")&pubkey=\(key)&ip=\(localIp)&port=8765"
 
         let filter = CIFilter.qrCodeGenerator()
         filter.message = Data(content.utf8)

@@ -19,8 +19,9 @@ class CallWindowManager {
         window.styleMask = [.borderless]
         window.isOpaque = false
         window.backgroundColor = .clear
-        window.level = .floating
+        window.level = .screenSaver  // Above everything including full-screen apps
         window.center()
+        NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
         self.incomingCallWindow = window
     }

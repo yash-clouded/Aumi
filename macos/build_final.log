@@ -1,7 +1,10 @@
+warning: 'starscream': found 1 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/yash/Aumi/macos/.build/checkouts/Starscream/Sources/Info.plist
+[0/1] Planning build
 Building for production...
-[0/4] Write sources
-[1/4] Write swift-version--1AB21518FC5DEDBE.txt
-[3/5] Compiling Aumi AppDelegate.swift
+[0/3] Write sources
+[1/3] Write swift-version--1AB21518FC5DEDBE.txt
+[3/4] Compiling Aumi AppDelegate.swift
 /Users/yash/Aumi/macos/Sources/Aumi/ScreenMirror/ScreenMirrorWindow.swift:24:13: warning: initialization of immutable value 'screenRect' was never used; consider replacing with assignment to '_' or removing it [#no-usage]
  22 |     
  23 |     init() {
@@ -67,4 +70,4 @@ Building for production...
 115 |     }
 [3/5] Write Objects.LinkFileList
 [4/5] Linking Aumi
-Build complete! (4.04s)
+Build complete! (3.42s)

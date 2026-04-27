@@ -36,10 +36,14 @@ class ConnectionManager {
     // MARK: - Start / Stop
 
     func start() {
-        sessionKey = PairingManager.shared.loadSessionKey()
+        refreshSessionKey()
         startTCPListener()
         startUDPListener()
         isRunning = true
+    }
+
+    func refreshSessionKey() {
+        sessionKey = PairingManager.shared.loadSessionKey()
     }
 
     func stop() {
@@ -52,19 +56,30 @@ class ConnectionManager {
     // MARK: - TCP Listener (Control + Video)
 
     private func startTCPListener() {
-        let params = NWParameters(tls: nil, tcp: .init())
-        if let tcpOptions = params.defaultProtocolStack.applicationProtocols.first as? NWProtocolTCP.Options {
-            tcpOptions.noDelay = true
+        let params = NWParameters.tcp
+        
+        // Android 16 USB Tunnel Optimization: Force Dual Stack (IPv4 + IPv6)
+        params.requiredLocalEndpoint = nil 
+        params.allowLocalEndpointReuse = true
+        params.includePeerToPeer = true
+        
+        if let ipOptions = params.defaultProtocolStack.internetProtocol as? NWProtocolIP.Options {
+            ipOptions.version = .any // Listen on both IPv4 and IPv6
         }
 
         guard let listener = try? NWListener(using: params, on: tcpPort) else { return }
         self.tcpListener = listener
 
         listener.newConnectionHandler = { [weak self] connection in
-            self?.tcpConnection?.cancel()  // Drop old connection
+            self?.tcpConnection?.cancel()  
             self?.tcpConnection = connection
             connection.start(queue: self?.queue ?? .main)
             self?.receiveNextFrame(connection: connection)
+            
+            // Visual feedback on Mac
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: Notification.Name("AumiConnected"), object: nil)
+            }
             print("ConnectionManager: Android connected via TCP ✅")
         }
         listener.start(queue: queue)
@@ -74,49 +89,57 @@ class ConnectionManager {
 
     /// Reads frames in the format: [type(1)][len(4)][iv(12)][encrypted body]
     private func receiveNextFrame(connection: NWConnection) {
-        // 1. Read header: type(1) + length(4) = 5 bytes
-        connection.receive(minimumIncompleteLength: 5, maximumLength: 5) { [weak self] data, _, _, error in
-            guard let self = self, let data = data, data.count == 5, error == nil else {
-                self?.handleTCPError()
-                return
+        connection.receive(minimumIncompleteLength: 5, maximumLength: 5) { [weak self] data, _, isComplete, error in
+            guard let data = data, data.count == 5, error == nil else { 
+                print("ConnectionManager: Failed to read frame header ❌ error: \(String(describing: error))")
+                return 
             }
+            
             let frameType = data[0]
             let bodyLen   = Int(data[1]) << 24 | Int(data[2]) << 16 | Int(data[3]) << 8 | Int(data[4])
-
-            // 2. Read IV(12) + body(bodyLen)
+            print("ConnectionManager: Incoming frame type: \(String(format: "0x%02X", frameType)), bodyLen: \(bodyLen) bytes")
+            
             connection.receive(minimumIncompleteLength: 12 + bodyLen, maximumLength: 12 + bodyLen) { [weak self] frame, _, _, error in
-                guard let self = self, let frame = frame, error == nil else {
-                    self?.handleTCPError()
-                    return
+                guard let frame = frame, error == nil else { 
+                    print("ConnectionManager: Failed to read frame body ❌")
+                    return 
                 }
-                self.processFrame(type: frameType, frame: frame, bodyLen: bodyLen)
-                self.receiveNextFrame(connection: connection)  // Re-arm
+                self?.processFrame(type: frameType, frame: frame, bodyLen: bodyLen)
+                self?.receiveNextFrame(connection: connection)
             }
         }
     }
 
     private func processFrame(type: UInt8, frame: Data, bodyLen: Int) {
-        guard let key = sessionKey else { return }
+        guard let key = sessionKey else { 
+            print("ConnectionManager: Received frame but sessionKey is NIL! ❌")
+            return 
+        }
         let iv         = frame.prefix(12)
         let ciphertext = frame.suffix(from: 12)
-        guard let plaintext = try? AESCipher.decrypt(key: key, payload: iv + ciphertext) else { return }
-
-        switch type {
-        case 0x01:  // Control message
-            if let json = try? JSONSerialization.jsonObject(with: plaintext) as? [String: Any] {
-                DispatchQueue.main.async { self.dispatchControl(json) }
-            }
-        case 0xF0:  // H.264 video (PTS 8B + flags 1B at start of payload)
-            if plaintext.count > 9 {
-                var pts: Int64 = 0
-                _ = withUnsafeMutableBytes(of: &pts) { plaintext.copyBytes(to: $0, from: 0..<8) }
-                let nalData = plaintext.suffix(from: 9)
-                DispatchQueue.global(qos: .userInteractive).async {
-                    self.videoDecoder?.decode(data: nalData, pts: pts.bigEndian)
+        
+        do {
+            let plaintext = try AESCipher.decrypt(key: key, payload: iv + ciphertext)
+            
+            switch type {
+            case 0x01:  // Control message
+                if let json = try? JSONSerialization.jsonObject(with: plaintext) as? [String: Any] {
+                    DispatchQueue.main.async { self.dispatchControl(json) }
                 }
+            case 0xF0:  // H.264 video
+                if plaintext.count > 9 {
+                    var pts: Int64 = 0
+                    _ = withUnsafeMutableBytes(of: &pts) { plaintext.copyBytes(to: $0, from: 0..<8) }
+                    let nalData = plaintext.suffix(from: 9)
+                    DispatchQueue.global(qos: .userInteractive).async {
+                        self.videoDecoder?.decode(data: nalData, pts: pts.bigEndian)
+                    }
+                }
+            default:
+                break
             }
-        default:
-            break
+        } catch {
+            print("ConnectionManager: Decryption failed! Check session keys. ❌ error: \(error)")
         }
     }
 
@@ -127,6 +150,15 @@ class ConnectionManager {
         switch type {
         case "CALL_EVENT":
             callManager?.handleCallEvent(json)
+        case "CALL_INCOMING":
+            // Android sends type=CALL_INCOMING directly — forward to CallManager
+            var enriched = json
+            enriched["event"] = "INCOMING"
+            callManager?.handleCallEvent(enriched)
+        case "CALL_DISCONNECTED":
+            var enriched = json
+            enriched["event"] = "CALL_DISCONNECTED"
+            callManager?.handleCallEvent(enriched)
         case "SMS":
             NotificationBridge.shared.handleIncomingSMS(json)
         case "NOTIFICATION":
