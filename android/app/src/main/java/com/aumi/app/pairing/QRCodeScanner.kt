@@ -89,11 +89,14 @@ class QRCodeScanner(private val context: Context) {
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
 
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider(surfaceProvider)
-            }
+            val preview = Preview.Builder()
+                .setTargetResolution(android.util.Size(1280, 720))
+                .build().also {
+                    it.setSurfaceProvider(surfaceProvider)
+                }
 
             val imageAnalysis = ImageAnalysis.Builder()
+                .setTargetResolution(android.util.Size(1280, 720))
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
 
