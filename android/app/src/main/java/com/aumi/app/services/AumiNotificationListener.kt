@@ -115,30 +115,28 @@ class AumiNotificationListener : NotificationListenerService() {
      * Finds the cached action and fires it — Gmail sends the reply or archives the email.
      */
     fun handleCallAction(callId: String, type: String) {
-        android.util.Log.d("AumiNotif", "Remote action requested: $type for $callId")
+        android.util.Log.d("AumiNotif", "Remote action requested: $type")
+        val audioManager = getSystemService(android.content.Context.AUDIO_SERVICE) as android.media.AudioManager
         
-        // Comprehensive search for common call action titles across all OEMs
-        val searchTerms = if (type == "CALL_ANSWER") 
-            listOf("Answer", "Accept", "Pick up", "Receive", "Talk", "Call")
-        else 
-            listOf("Decline", "Reject", "Hang up", "Dismiss", "End", "Cancel")
-
-        val prefix = "$callId:"
-        val match = actionCache.keys.firstOrNull { key ->
-            key.startsWith(prefix) && searchTerms.any { term -> key.contains(term, ignoreCase = true) }
-        }
-
-        if (match != null) {
-            android.util.Log.d("AumiNotif", "Found matching action: $match. Triggering intent...")
-            try {
-                actionCache[match]?.actionIntent?.send()
-                android.util.Log.d("AumiNotif", "Intent sent successfully ✅")
-            } catch (e: Exception) {
-                android.util.Log.e("AumiNotif", "Failed to send intent ❌", e)
-            }
+        if (type == "CALL_ANSWER") {
+            // Simulate Bluetooth Headset "Answer" button press
+            val downEvent = android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_HEADSETHOOK)
+            audioManager.dispatchMediaKeyEvent(downEvent)
+            val upEvent = android.view.KeyEvent(android.view.KeyEvent.ACTION_UP, android.view.KeyEvent.KEYCODE_HEADSETHOOK)
+            audioManager.dispatchMediaKeyEvent(upEvent)
+            android.util.Log.d("AumiNotif", "Sent KEYCODE_HEADSETHOOK ✅")
         } else {
-            android.util.Log.w("AumiNotif", "NO MATCHING ACTION FOUND for $type! Check cache content.")
-            android.util.Log.d("AumiNotif", "Cache content: ${actionCache.keys.filter { it.startsWith(prefix) }}")
+            // For Decline, we still use the notification action as it's more reliable for hanging up
+            val prefix = "$callId:"
+            val match = actionCache.keys.firstOrNull { key ->
+                key.startsWith(prefix) && listOf("Decline", "Reject", "Hang up", "End").any { key.contains(it, ignoreCase = true) }
+            }
+            match?.let { 
+                try {
+                    actionCache[it]?.actionIntent?.send()
+                    android.util.Log.d("AumiNotif", "Sent Decline Intent ✅")
+                } catch (e: Exception) { e.printStackTrace() }
+            }
         }
     }
 
